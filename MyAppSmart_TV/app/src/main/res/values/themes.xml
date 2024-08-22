@@ -1,0 +1,4 @@
+<resources>
+
+    <style name="Theme.MyAppSmart_TV" parent="Theme.AppCompat.DayNight.NoActionBar" />
+</resources>
