@@ -1,6 +1,5 @@
 package com.example.myappsmart_tv
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -32,20 +31,19 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 @Composable
-fun MovieDetailsScreen(movieId: String, onBackClick: () -> Unit) {
+fun DetallesPelicula (movieId: String, onBackClick: () -> Unit) {
     val apiKey = "993b2122d505abf4d1ead097120645fb"
     val repository = MovieRepository()
     var movie by remember { mutableStateOf<Movie?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    // Configurar cliente HTTP que omite validación SSL (solo para pruebas)
     val imageLoader = ImageLoader.Builder(LocalContext.current)
         .crossfade(true)
         .okHttpClient {
             OkHttpClient.Builder()
                 .sslSocketFactory(createInsecureSslSocketFactory(), createInsecureTrustManager())
-                .hostnameVerifier { _, _ -> true } // Omite la verificación del hostname
+                .hostnameVerifier { _, _ -> true }
                 .addInterceptor(HttpLoggingInterceptor().apply {
                     level = HttpLoggingInterceptor.Level.BODY
                 })
@@ -87,37 +85,81 @@ fun MovieDetailsScreen(movieId: String, onBackClick: () -> Unit) {
         } else {
             movie?.let {
                 val imageUrl = "https://image.tmdb.org/t/p/w500${it.poster_path}"
-                Log.d("MovieDetailsScreen", "Image URL: $imageUrl")
 
-                Column(modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxSize()) {
+                // Organizar la imagen y los datos en una fila (horizontal)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    // Imagen en el lado izquierdo
                     Image(
                         painter = rememberAsyncImagePainter(
                             model = ImageRequest.Builder(LocalContext.current)
                                 .data(imageUrl)
                                 .crossfade(true)
-                                .size(Size.ORIGINAL) // Puedes ajustar el tamaño aquí
+                                .size(Size.ORIGINAL)
                                 .build(),
                             imageLoader = imageLoader
                         ),
                         contentDescription = it.title,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(250.dp)
-                            .border(1.dp, Color.Black, shape = RoundedCornerShape(4.dp))
+                            .weight(1f) // La imagen toma 1/3 del espacio horizontal
+                            .height(400.dp)
+                            .border(2.dp, Color.Black, shape = RoundedCornerShape(8.dp))
+                            .padding(8.dp)
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(text = "Título: ${it.title}", style = MaterialTheme.typography.h5)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Descripción: ${it.overview}", style = MaterialTheme.typography.body1)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
 
-                    // Campos adicionales: Popularidad y Fecha de lanzamiento
-                    Text(text = "Popularidad: ${it.popularity}", style = MaterialTheme.typography.body1)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Fecha de lanzamiento: ${it.release_date}", style = MaterialTheme.typography.body1)
+                    // Datos de la película en el lado derecho
+                    Column(
+                        modifier = Modifier
+                            .weight(2f) // Los datos toman 2/3 del espacio horizontal
+                            .padding(8.dp)
+                    ) {
+                        // Título
+                        Text(
+                            text = it.title,
+                            style = MaterialTheme.typography.h4.copy(
+                                fontSize = 26.sp,
+                                color = Color.Black
+                            ),
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+
+                        // Descripción
+                        Text(
+                            text = it.overview,
+                            style = MaterialTheme.typography.body1.copy(
+                                fontSize = 16.sp,
+                                color = Color.Gray
+                            ),
+                            maxLines = 5, // Limita a 5 líneas
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+
+                        // Popularidad
+                        Text(
+                            text = "Popularidad: ${it.popularity}",
+                            style = MaterialTheme.typography.body1.copy(
+                                fontSize = 16.sp,
+                                color = Color.Black
+                            ),
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+
+                        // Fecha de lanzamiento
+                        Text(
+                            text = "Fecha de lanzamiento: ${it.release_date}",
+                            style = MaterialTheme.typography.body1.copy(
+                                fontSize = 16.sp,
+                                color = Color.Black
+                            ),
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
                 }
             }
         }
